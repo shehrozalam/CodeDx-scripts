@@ -90,6 +90,10 @@ function monitorAanalysis()
 			response=$(curl -sS -X GET -H "API-Key: $api_key" "$web_url/codedx/api/jobs/$anaylsisJobId")
 			status=$(echo "${response}" | jq --raw-output '.status')
 			finalStatus=$status
+			if [ "$status" == "failed" ]; then
+				analysisFinished=false
+				break
+			fi
 			if [ "$status" == "completed" ]; then
 				analysisFinished=true
 				break
