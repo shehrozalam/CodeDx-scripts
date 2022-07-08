@@ -84,19 +84,18 @@ function waitForPrep()
 function triggerAnalysis()
 {
         #if no errors were found, let's trigger the analysis!
-        response=$(curl -sS -X 'POST' --user ${USER}:${PASS} "$web_url/codedx/api/analysis-prep/$prepId/analyze" -H 'accept: */*' -d "")
+        response=$(curl -sS -X 'POST' --user ${user}:${pass} "$web_url/codedx/api/analysis-prep/$prepId/analyze" -H 'accept: */*' -d "")
         analysisId=$(echo "${response}" | jq --raw-output '.analysisId')
         anaylsisJobId=$(echo "${response}" | jq --raw-output '.jobId')        	
 }
 
 function monitorAanalysis()
 {
-		response=$(curl -sS -X GET --user ${USER}:${PASS} "$web_url/codedx/api/jobs/$anaylsisJobId")
 		retryCount=0
 		finalStatus=""
 		while [ retryCount != retryForAnalysis ]
 		do			
-			response=$(curl -sS -X GET --user ${USER}:${PASS} "$web_url/codedx/api/jobs/$anaylsisJobId")
+			response=$(curl -sS -X GET --user ${user}:${pass} "$web_url/codedx/api/jobs/$anaylsisJobId")
 			status=$(echo "${response}" | jq --raw-output '.status')
 			finalStatus=$status
 			if [ "$status" == "completed" ]; then
