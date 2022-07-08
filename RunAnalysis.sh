@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ############## USAGE ########################
-./RunAnalysis.sh --user $USER --pass $PASSWORD --cdx-url $CDX_URL --project-id $PROJECT_ID
+#./RunAnalysis.sh --user $USER --pass $PASSWORD --cdx-url $CDX_URL --project-id $PROJECT_ID
 #############################################
 
 user=""
