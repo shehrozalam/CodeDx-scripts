@@ -15,7 +15,8 @@ analysisId=""
 anaylsisJobId=""
 analysisFinished=false
 retryForPrep=100
-retryForAnalysis=200
+retryForAnalysis=300
+sleep=10
 
 function verifyInput()
 {
@@ -67,7 +68,7 @@ function waitForPrep()
 				break
 			else
 				retryCount=$[$retryCount +1]				
-				sleep $retryCount
+				sleep $sleep
 			fi			
 		done
 		
@@ -102,10 +103,9 @@ function monitorAanalysis()
 				analysisFinished=true
 				break
 			else
-				echo -ne "$pc%\033[0K\r"
 				echo "waiting for analysis to finish. Total retries done: $retryCount"
 				retryCount=$[$retryCount +1]				
-				sleep $retryCount # incremental wait
+				sleep $sleep #wait
 			fi			
 		done
 		
