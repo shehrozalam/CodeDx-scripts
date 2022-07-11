@@ -14,6 +14,12 @@ retryForPrep=10
 retryForAnalysis=300
 sleep=10
 
+function downloadJq()
+{
+	curl -sLo ./myJq https://stedolan.github.io/jq/download/linux64/jq
+	chmod +x ./myJq
+}
+
 function verifyInput()
 {
 	
@@ -158,6 +164,7 @@ done
 
 # Start
 verifyInput
+downloadJq
 prepAnalysis
 waitForPrep
 triggerAnalysis
