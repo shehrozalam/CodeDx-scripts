@@ -20,8 +20,8 @@ sleep=10
 
 function downloadJq()
 {
-	curl https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o ./myJq
-	chmod +x ./myjq
+	curl -sLo ./myJq https://stedolan.github.io/jq/download/linux64/jq
+	chmod +x ./myJq
 }
 
 function verifyInput()
