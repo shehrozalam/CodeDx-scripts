@@ -8,6 +8,7 @@ user=""
 web_url=""
 pass=""
 project_id=0
+install_jq=false
 
 prepId=""
 prepFinished=false
@@ -20,8 +21,11 @@ sleep=10
 
 function downloadJq()
 {
-	curl -sLo ./myJq https://stedolan.github.io/jq/download/linux64/jq
-	chmod +x ./myJq
+	if [ "$install_jq" == "true" ]
+	then 
+		curl -sLo ./myJq https://stedolan.github.io/jq/download/linux64/jq
+		chmod +x ./myJq
+	fi	
 }
 
 function verifyInput()
@@ -155,6 +159,9 @@ while [[ $# -gt 0 ]]; do
         shift
         project_id="$1"
         ;;
+	--install-jq)
+	install_jq="$1"
+	;;
         *)
         # Do whatever you want with extra options
         echo "Unknown option '$key'"
