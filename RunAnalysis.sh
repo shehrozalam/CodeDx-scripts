@@ -21,6 +21,7 @@ sleep=10
 function downloadJq()
 {
 	curl https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o ./myJq
+	chmod +x ./myjq
 }
 
 function verifyInput()
