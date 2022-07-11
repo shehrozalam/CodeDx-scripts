@@ -18,6 +18,11 @@ retryForPrep=100
 retryForAnalysis=300
 sleep=10
 
+function downloadJq()
+{
+	curl https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o ./myJq
+}
+
 function verifyInput()
 {
 	if [ -z "$user" ]
@@ -47,7 +52,7 @@ function verifyInput()
 function prepAnalysis()
 {
 		response=$(curl -sS -X 'POST' --user ${user}:${pass} "$web_url/codedx/api/analysis-prep" -H 'accept: application/json' -H 'Content-Type: application/json' -d "{\"projectId\":$project_id}")
-        prepId=$(echo "${response}" | jq --raw-output '.prepId')
+        prepId=$(echo "${response}" | ./myJq --raw-output '.prepId')
 		if [ -z "$prepId" ]
 		then
 			echo "no PrepId found .. exiting"
@@ -62,7 +67,7 @@ function waitForPrep()
 		while [ retryCount != retryForPrep ]
 		do			
 			response=$(curl -sS -X 'GET' --user ${user}:${pass} "$web_url/codedx/api/analysis-prep/$prepId" -H "accept: application/json")
-			verificationErrors=$(echo "${response}" | jq --raw-output '.verificationErrors')
+			verificationErrors=$(echo "${response}" | ./myJq --raw-output '.verificationErrors')
 			if [ "$verificationErrors" == "[]" ]; then
 				prepFinished=true
 				break
@@ -85,8 +90,8 @@ function triggerAnalysis()
 {
         #if no errors were found, let's trigger the analysis!
         response=$(curl -sS -X 'POST' --user ${user}:${pass} "$web_url/codedx/api/analysis-prep/$prepId/analyze" -H 'accept: */*' -d "")
-        analysisId=$(echo "${response}" | jq --raw-output '.analysisId')
-        anaylsisJobId=$(echo "${response}" | jq --raw-output '.jobId')        	
+        analysisId=$(echo "${response}" | ./myJq --raw-output '.analysisId')
+        anaylsisJobId=$(echo "${response}" | ./myJq --raw-output '.jobId')        	
 }
 
 function monitorAanalysis()
@@ -96,7 +101,7 @@ function monitorAanalysis()
 		while [ retryCount != retryForAnalysis ]
 		do			
 			response=$(curl -sS -X GET --user ${user}:${pass} "$web_url/codedx/api/jobs/$anaylsisJobId")
-			status=$(echo "${response}" | jq --raw-output '.status')
+			status=$(echo "${response}" | ./myJq --raw-output '.status')
 			finalStatus=$status
 			if [ "$status" == "failed" ]; then
 				analysisFinished=false
@@ -159,6 +164,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Start
+downloadJq
 verifyInput
 prepAnalysis
 waitForPrep
