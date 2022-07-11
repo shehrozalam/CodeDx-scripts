@@ -3,14 +3,14 @@
 api_key=""
 web_url=""
 project_id=0
-export_report=false
-install_jq=false
+export_report="false"
+install_jq="false"
 
 prepId=""
-prepFinished=false
+prepFinished="false"
 analysisId=""
 anaylsisJobId=""
-analysisFinished=false
+analysisFinished="false"
 retryForPrep=10
 retryForAnalysis=300
 sleep=10
@@ -19,8 +19,9 @@ function downloadJq()
 {
 	if [ "$install_jq" == "true" ]
 	then 
-		curl -sLo ./myJq https://stedolan.github.io/jq/download/linux64/jq
-		chmod +x ./myJq
+		curl -sLo ./jq https://stedolan.github.io/jq/download/linux64/jq
+		chmod +x ./jq
+		export PATH=$PATH:$(pwd)/jq		
 	fi	
 }
 
@@ -65,7 +66,7 @@ function waitForPrep()
 			response=$(curl -sS -X 'GET' -H "API-Key: $api_key" "$web_url/codedx/api/analysis-prep/$prepId" -H "accept: application/json")
 			verificationErrors=$(echo "${response}" | jq --raw-output '.verificationErrors')
 			if [ "$verificationErrors" == "[]" ]; then
-				prepFinished=true
+				prepFinished="true"
 				break
 			else
 				retryCount=$[$retryCount +1]				
@@ -101,11 +102,11 @@ function monitorAanalysis()
 			status=$(echo "${response}" | jq --raw-output '.status')
 			finalStatus=$status
 			if [ "$status" == "failed" ]; then
-				analysisFinished=false
+				analysisFinished="false"
 				break
 			fi
 			if [ "$status" == "completed" ]; then
-				analysisFinished=true
+				analysisFinished="true"
 				break
 			else
 				echo "waiting for analysis to finish. Total retries done: $retryCount"
@@ -158,6 +159,7 @@ while [[ $# -gt 0 ]]; do
 	export_report="$1"
 	;;
 	--install-jq)
+	shift
 	install_jq="$1"
 	;;
         *)
