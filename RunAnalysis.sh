@@ -165,8 +165,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Start
-downloadJq
 verifyInput
+downloadJq
 prepAnalysis
 waitForPrep
 triggerAnalysis
