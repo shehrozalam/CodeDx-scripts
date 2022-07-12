@@ -142,7 +142,7 @@ function exportReport()
 				exit 0
 			fi
 			echo "exporting Report"
-			response=$(curl -X 'POST' --user ${user}:${pass} "$web_url/codedx/api/projects/15/report/pdf" -H 'accept: application/json' -H 'Content-Type: application/json' -d "{\"filter\":{\"~status\":[7,5,9,4,3],\"globalConfig\":{\"ignoreArchived\":true}},\"config\":{\"summaryMode\":\"simple\",\"detailsMode\":\"simple\",\"includeFindingHostDetails\":false,\"includeResultDetails\":false,\"includeRequestResponse\":false,\"includeComments\":false,\"includeStandards\":true}}")
+			response=$(curl -sS -X 'POST' --user ${user}:${pass} "$web_url/codedx/api/projects/15/report/pdf" -H 'accept: application/json' -H 'Content-Type: application/json' -d "{\"filter\":{\"~status\":[7,5,9,4,3],\"globalConfig\":{\"ignoreArchived\":true}},\"config\":{\"summaryMode\":\"simple\",\"detailsMode\":\"simple\",\"includeFindingHostDetails\":false,\"includeResultDetails\":false,\"includeRequestResponse\":false,\"includeComments\":false,\"includeStandards\":true}}")
 			reportJob_Id=$(echo "${response}" | jq --raw-output '.jobId')
 			
 			retryCount=0
@@ -172,7 +172,7 @@ function exportReport()
 				echo "last status was: $finalStatus"
 				exit 1
 			else 
-				curl -X GET --user ${user}:${pass} "$web_url/codedx/api/jobs/$reportJob_Id/result" -o CDX_REPORT.pdf
+				curl -sS -X GET --user ${user}:${pass} "$web_url/codedx/api/jobs/$reportJob_Id/result" -o CDX_REPORT.pdf
 				echo "report exported"
 			fi
 }
