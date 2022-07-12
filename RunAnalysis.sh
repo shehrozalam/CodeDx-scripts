@@ -9,6 +9,7 @@ web_url=""
 pass=""
 project_id=0
 install_jq="false"
+export_report="false"
 
 prepId=""
 prepFinished="false"
@@ -18,6 +19,8 @@ analysisFinished="false"
 retryForPrep=100
 retryForAnalysis=300
 sleep=10
+reportJob_Id=""
+reportJobFinished="false"
 
 function downloadJq()
 {
@@ -133,6 +136,47 @@ function monitorAanalysis()
 		fi		
 }
 
+function exportReport()
+{
+			if [ "$export_report" == "false" ]; then
+				exit 0
+			fi
+			echo "exporting Report"
+			response=$(curl -X 'POST' --user ${user}:${pass} "$web_url/codedx/api/projects/15/report/pdf" -H 'accept: application/json' -H 'Content-Type: application/json' -d "{\"filter\":{\"~status\":[7,5,9,4,3],\"globalConfig\":{\"ignoreArchived\":true}},\"config\":{\"summaryMode\":\"simple\",\"detailsMode\":\"simple\",\"includeFindingHostDetails\":false,\"includeResultDetails\":false,\"includeRequestResponse\":false,\"includeComments\":false,\"includeStandards\":true}}")
+			reportJob_Id=$(echo "${response}" | jq --raw-output '.jobId')
+			
+			retryCount=0
+			finalStatus=""
+			while [ retryCount != retryForAnalysis ]
+			do			
+				response=$(curl -sS -X GET --user ${user}:${pass} "$web_url/codedx/api/jobs/$reportJob_Id")
+				status=$(echo "${response}" | jq --raw-output '.status')
+				finalStatus=$status
+				if [ "$status" == "failed" ]; then
+					reportJobFinished="false"
+					break
+				fi
+				if [ "$status" == "completed" ]; then
+					reportJobFinished="true"
+					break
+				else
+					echo "waiting for report to finish. Total retries done: $retryCount"
+					retryCount=$[$retryCount +1]				
+					sleep $sleep #wait
+				fi			
+			done
+			
+			if [ "$reportJobFinished" == "false" ]
+			then 
+				echo "Unable to finish the report... exiting"
+				echo "last status was: $finalStatus"
+				exit 1
+			else 
+				curl -X GET --user ${user}:${pass} "$web_url/codedx/api/jobs/$reportJob_Id/result" -o CDX_REPORT.pdf
+				echo "report exported"
+			fi
+}
+
 ################ MAIN ##################
 
 # Get inputs
@@ -160,10 +204,14 @@ while [[ $# -gt 0 ]]; do
         shift
         project_id="$1"
         ;;
-	--install-jq)
-	shift
-	install_jq="$1"
-	;;
+		--install-jq)
+		shift
+		install_jq="$1"
+		;;
+		--export-report)
+		shift
+		export_report="$1"
+		;;
         *)
         # Do whatever you want with extra options
         echo "Unknown option '$key'"
@@ -180,5 +228,7 @@ prepAnalysis
 waitForPrep
 triggerAnalysis
 monitorAanalysis
+exportReport
+
 
 ##############################################
